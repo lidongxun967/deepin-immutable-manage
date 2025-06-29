@@ -23,7 +23,7 @@ jobs:
         pip install -r requirements.txt
     
     - name: Install UPX
-      run: 
+      run: |
         sudo apt install -y upx
         sudo apt autoremove -y
 
