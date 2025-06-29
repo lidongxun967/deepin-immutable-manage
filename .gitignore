@@ -208,3 +208,4 @@ __marimo__/
 main.dist/
 main.bin
 nuitka-crash-report.xml
+deepin-immutable-manage

@@ -23,11 +23,16 @@ jobs:
         pip install -r requirements.txt
     
     - name: Install UPX
-      run: sudo apt-get install -y upx
+      run: 
+        sudo apt install -y upx
+        sudo apt autoremove -y
+
 
     - name: Build with Nuitka
       run: |
-        python -m nuitka --standalone --onefile --enable-plugin=tk-inter,upx --follow-imports --output-filename=deepin-immutable-manage main.py
+        python -m nuitka --standalone --onefile --enable-plugin=tk-inter,upx \
+          --lto=yes --remove-output \
+          --output-filename=deepin-immutable-manage --verbose main.py
 
 
     - name: Upload release assets
