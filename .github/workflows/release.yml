@@ -32,7 +32,7 @@ jobs:
       run: |
         python -m nuitka --standalone --onefile --enable-plugin=tk-inter,upx \
           --lto=yes --remove-output \
-          --output-filename=deepin-immutable-manage --verbose main.py
+          --output-filename=deepin-immutable-manage main.py
 
 
     - name: Upload release assets
