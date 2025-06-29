@@ -22,9 +22,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
+    - name: Install UPX
+      run: sudo apt-get install -y upx
+
     - name: Build with Nuitka
       run: |
-        python -m nuitka --standalone --onefile --enable-plugin=tk-inter --follow-imports --output-filename=deepin-immutable-manage main.py
+        python -m nuitka --standalone --onefile --enable-plugin=tk-inter,upx --follow-imports --output-filename=deepin-immutable-manage main.py
+
 
     - name: Upload release assets
       uses: softprops/action-gh-release@v2
