@@ -31,9 +31,12 @@ jobs:
     - name: Build with Nuitka
       run: |
         python -m nuitka --standalone --onefile --enable-plugin=tk-inter,upx \
-          --lto=yes --remove-output --static-libpython=yes \
-          --python-flag=-S --noinclude-custom-mode \
-          --output-filename=deepin-immutable-manage main.py
+          --lto=yes --remove-output \
+          --output-filename=deepin-immutable-manage \
+          --static-libpython=yes \
+          --include-module=_bisect \
+          --include-module=socket \
+          main.py
 
 
     - name: Upload release assets
