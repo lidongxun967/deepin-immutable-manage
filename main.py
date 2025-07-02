@@ -6,6 +6,7 @@ from tkinter import ttk
 from box import MessageBox, SimpleDialog
 import subprocess
 import tools
+import os
 class DeepinImmutableManager:
     def __init__(self, root):
         self.root = root
@@ -15,6 +16,13 @@ class DeepinImmutableManager:
         self.sudo_password = None
         
         self.create_widgets()
+        is_immutable = tools.is_immutable()
+        if not is_immutable:
+            # 隐藏主窗口
+            root.withdraw()
+            MessageBox.showerror("错误", "未检测到磐石系统，无法使用此工具")
+            root.quit()
+            os._exit(1)
         # 启动时预先进行sudo验证
         if not self.run_command("echo sudo完成", need_sudo=True):
             MessageBox.showerror("错误", "需要sudo权限才能继续")
@@ -68,10 +76,16 @@ class DeepinImmutableManager:
                  style="danger.TButton").pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
         ttk.Button(btn_frame, text="退出", command=self.root.quit).pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
     
-    def get_sudo_password(self):
-        """显示密码输入对话框"""
-        password = SimpleDialog().askstring("密码", "请输入sudo密码:",
-                                            show='*', parent=self.root)
+    def get_sudo_password(self, retry=False):
+        """显示密码输入对话框
+        参数:
+            retry: 是否为重试
+        返回:
+            bool: 是否成功获取密码
+        """
+        prompt = "密码错误，请重试:" if retry else "请输入sudo密码:"
+        password = SimpleDialog().askstring("密码", prompt,
+                                          show='*', parent=self.root)
         if password:
             self.sudo_password = password + '\n'
             return True
@@ -90,18 +104,21 @@ class DeepinImmutableManager:
             # 处理多条命令
             if need_sudo:
                 if not self.sudo_valid:
-                    if not self.get_sudo_password():
-                        return None
-                    proc = subprocess.run(['sudo', '-S', '-v'],
-                                        input=self.sudo_password,
-                                        text=True,
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE)
-                    if proc.returncode == 0:
-                        self.sudo_valid = True
-                    else:
-                        MessageBox.showerror("错误", "密码验证失败")
-                        return None
+                    max_attempts = 3
+                    for attempt in range(max_attempts):
+                        if not self.get_sudo_password(retry=attempt > 0):
+                            return None
+                        proc = subprocess.run(['sudo', '-S', '-v'],
+                                            input=self.sudo_password,
+                                            text=True,
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE)
+                        if proc.returncode == 0:
+                            self.sudo_valid = True
+                            break
+                        if attempt == max_attempts - 1:
+                            MessageBox.showerror("错误", "密码验证失败，已达最大重试次数")
+                            return None
                 joined_cmds = " && ".join(cmd)
                 cmd = ['bash', '-c', f"sudo bash -c '{joined_cmds}'"]
                 result = subprocess.run(cmd, check=True,
@@ -180,5 +197,6 @@ if __name__ == "__main__":
     root = tk.Tk()
     
     sv_ttk.set_theme("dark")
+
     app = DeepinImmutableManager(root)
     root.mainloop()

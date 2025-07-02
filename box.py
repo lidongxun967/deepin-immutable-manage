@@ -110,10 +110,10 @@ class SimpleDialog:
         # 计算并设置窗口居中位置
         dialog.update_idletasks()
         width = dialog.winfo_width()
-        height = dialog.winfo_height()
+        height = 150  # 固定高度为150像素
         x = (dialog.winfo_screenwidth() // 2) - (width // 2)
         y = (dialog.winfo_screenheight() // 2) - (height // 2)
-        dialog.geometry(f'+{x}+{y}')
+        dialog.geometry(f'{width}x{height}+{x}+{y}')
         
         dialog.focus_force()  # 强制获取焦点
         

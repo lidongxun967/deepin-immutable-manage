@@ -1,6 +1,11 @@
 import os
 import tempfile
 
+def is_immutable():
+    # 执行 deepin-immutable-writable
+    return os.system("deepin-immutable-writable status > /dev/null 2>&1") == 0
+    
+
 def is_dir_writable(dir_path,sudo=False):
     """
     检测目录是否可写
