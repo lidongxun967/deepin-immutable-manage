@@ -120,8 +120,9 @@ class DeepinImmutableManager:
                             MessageBox.showerror("错误", "密码验证失败，已达最大重试次数")
                             return None
                 joined_cmds = " && ".join(cmd)
-                cmd = ['bash', '-c', f"sudo bash -c '{joined_cmds}'"]
+                cmd = ['sudo','-S','bash', '-c', joined_cmds]
                 result = subprocess.run(cmd, check=True,
+                                        input=self.sudo_password,
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE,
                                       text=True)
